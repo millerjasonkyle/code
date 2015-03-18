@@ -1,0 +1,90 @@
+Instructions to setup pflogging on OS X Devices
+
+* Set up logging so you can see what's going on
+    Make sure logging is enabled. By that, we mean that we want a "regular"
+    text log of things that get blocked by the firewall. Otherwise, you are
+    flying blind. This is in addition to the regular PF "logging" mechanism
+    of using the pflog device, which we'll need as well.
+
+** enable syslogging of local2 to /var/log/pf.log
+
+    echo -e "# gather PF log data\nlocal2.*\t\t\t/private/var/log/pf.log" >> /etc/syslog.conf
+    touch /private/var/log/pf.log
+    chmod 640 /private/var/log/pf.log
+    chown root:wheel /private/var/log/pf.log
+    killall -HUP syslogd
+
+** create a simple shell script to tcpdump from /dev/pflog0 to syslog
+cat >/usr/local/bin/pflog.sh <<END
+#!/bin/sh
+ 
+/sbin/ifconfig pflog0 create
+/usr/sbin/tcpdump -lnettti pflog0 | /usr/bin/logger -t pf -p local2.info
+END
+        chown root:wheel /usr/local/bin/pflog.sh
+        chmod 555 /usr/local/bin/pflog.sh
+
+** Create a Launch Control daemon to start at boot and ensure it is running
+
+cat >/Library/LaunchDaemons/nameof.plist <<END
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+        <key>Label</key>                <string>pflog</string>
+        <key>ProgramArguments</key>
+                <array>
+                        <string>/usr/local/bin/pflog.sh</string>
+                </array>
+        <key>Disabled</key>             <false/>
+        <key>RunAtLoad</key>            <true/>
+        <key>KeepAlive</key>            <true/>
+</dict>
+</plist>
+END
+        chown root:wheel /Library/LaunchDaemons/nameof.plist
+        chmod 444 /Library/LaunchDaemons/nameof.plist
+
+Use this section if pflogging seems to not be working on devices. Found that the first step of echo -e sometimes didn't add in local2 into syslog file. 
+
+#Uses logger, the interface to syslogd, needing an update to its config file
+edit /etc/syslog.conf, add this line to the end of the file
+local2.*            /var/log/pf.log
+
+#last step - switches the pfctl launch daemon to start fully enabled (rather than enabled on demand. Added the -e flag to enable pf. edit /System/Library/LaunchDaemons/com.apple.pfctl.plist
+ <key>ProgramArguments</key>
+
+        <array>
+                <string>pfctl</string>
+                <string>-ef</string>
+                <string>/etc/pf.conf</string>
+**********************************************************************
+        launchctl list | grep pf
+        launchctl load -w /Library/LaunchDaemons/nameof.plist
+        launchctl list | grep pf # should see pflog
+
+***********************************************************************
+This section is for Firewall enabled.
+
+* enable OS Firewall
+
+** update /etc/pf.conf to uses a custom anchor
+
+        edit /etc/pf.conf  to add: 
+                    scrub-anchor "name.offile/*"   # (to scrub section)
+                    load anchor "name.offile" from "/etc/pf.anchors/name.offile" # to end
+
+        install /etc/pf.anchors/name.offile	   
+
+** start up the firewall
+        verify: 
+            pfctl -vnf /etc/pf.conf
+        enable: 
+            pfctl -e -f /etc/pf.conf
+
+** /etc/pf.conf/pf.anchors/name.offile
+
+
+** Test/Review
+         Print out rules: pfctl -a name.offile -sr
+         Print out rules pfctl -sr
