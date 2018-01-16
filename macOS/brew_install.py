@@ -31,12 +31,12 @@ unzip.extractall(brew_temp_dir)
 unzip.close()
 
 #Create Homebrew directory
-def createFolder('/usr/local/test/Homebrew')
+def createFolder(directory)
     try:
-        if not os.path.exists('/usr/local/test/Homebrew')
-            os.makedirs('/usr/local/test/Homebrew')
+        if not os.path.exists(directory)
+            os.makedirs(directory)
     except OSError:
-        print ('Error: Creating directory.' + '/usr/local/test/Homebrew')
+        print ('Error: Creating directory.' + directory)
 
 createFolder('/usr/local/test/Homebrew')
 
