@@ -58,6 +58,3 @@ brew_copy(brew_temp_dir, brew_home)
 
 #cleaning up
 shutil.rmtree(brew_temp_dir)
-
-#used for testing
-#print brew_temp_dir
