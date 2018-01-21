@@ -42,7 +42,7 @@ def createFolder(directory):
     except OSError:
         print ('Error: Creating directory.' + directory)
 
-brew_home = ('/Users/jasonmiller/Desktop/Homebrew/')
+brew_home = ('/Users/../Desktop/Homebrew/')
 
 def brew_copy(brew_temp_dir, brew_home):
     try:
