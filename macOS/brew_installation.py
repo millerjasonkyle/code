@@ -8,6 +8,11 @@ import tempfile
 import pwd
 import zipfile
 import errno
+import sys
+
+#verify script is running as root
+if not os.geteuid()==0:
+    sys.exit("\nYou must be root to run this application, please    use sudo and try again.\n") 
 
 #grabbed current logged in user
 logged_in_user = pwd.getpwuid(os.getuid()).pw_name
