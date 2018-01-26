@@ -15,3 +15,6 @@ dl_iterm = urllib2.urlopen(
     'https://iterm2.com/downloads/stable/iTerm2-3_1_5.zip' ).read()
 
 dl_dropbox = urllib2.urlopen('https://www.dropbox.com/download?os=mac').read()
+
+with.open ("iterm.zip", "w") as fobj:
+    fobj.write(dl_iterm)
