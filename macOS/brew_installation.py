@@ -32,6 +32,9 @@ brew_temp_dir = tempfile.mkdtemp()
 os.chdir(brew_temp_dir)
 
 #store homebrew folder locations
+brew_directory = os.listdir(brew_temp_dir)
+
+print brew_directory
 
 #downloading brew.sh from github version the current version from Master
 homebrew_zip = urllib2.urlopen(
@@ -52,7 +55,7 @@ def createFolder(directory):
     except OSError:
         print ('Error: Creating directory.' + directory)
 
-brew_home = ('/Users/../Desktop/Homebrew/')
+brew_home = ('/Users/jasonmiller/Desktop/Homebrew/')
 
 def brew_copy(brew_temp_dir, brew_home):
     try:
