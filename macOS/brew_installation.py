@@ -23,6 +23,7 @@ def logged_in_user():
 	return username
 print logged_in_user()
 
+
 #logged_in_user = pwd.getpwuid(os.getuid()).pw_name
 
 #create a temp directory for brew.sh zip
@@ -30,11 +31,6 @@ brew_temp_dir = tempfile.mkdtemp()
 
 #changing directory to new created temp directory
 os.chdir(brew_temp_dir)
-
-#store homebrew folder locations
-brew_directory = os.listdir(brew_temp_dir)
-
-print brew_directory
 
 #downloading brew.sh from github version the current version from Master
 homebrew_zip = urllib2.urlopen(
@@ -47,6 +43,11 @@ with open ("brew.zip", "w") as f:
 with zipfile.ZipFile('brew.zip', 'r') as fobj:
     fobj.extractall(brew_temp_dir)
 
+#store homebrew folder locations
+#brew_directory = os.listdir(brew_temp_dir)
+
+#print brew_directory
+
 #Create Homebrew directory
 def createFolder(directory):
     try:
@@ -55,19 +56,24 @@ def createFolder(directory):
     except OSError:
         print ('Error: Creating directory.' + directory)
 
-brew_home = ('/Users/jasonmiller/Desktop/Homebrew/')
+brew_home = ('/usr/local/bin/Homebrew')
 
-def brew_copy(brew_temp_dir, brew_home):
-    try:
-        shutil.copytree(brew_temp_dir, brew_home)
-    except OSError as e:
-        # If the error was caused because the source wasn't a directory
-        if e.errno == errno.ENOTDIR:
-            shutil.copy(brew_temp_dir, brew_home)
-        else:
-            print('Directory not copied. Error: %s' % e)
+brew_files = ['bin', 'completions', 'Library', 'manpages']
+for i in brew_files:
+    source = os.path.join(brew_temp_dir, 'brew-master', i)
+    shutil.copytree(source, os.path.join('/usr/local/bin/Homebrew', i))
 
-brew_copy(brew_temp_dir, brew_home)
+# def brew_copy(brew_temp_dir, brew_home):
+#     try:
+#         shutil.copytree(brew_temp_dir, brew_home)
+#     except OSError as e:
+#         # If the error was caused because the source wasn't a directory
+#         if e.errno == errno.ENOTDIR:
+#             shutil.copy(brew_temp_dir, brew_home)
+#         else:
+#             print('Directory not copied. Error: %s' % e)
+
+# brew_copy(brew_temp_dir, brew_home)
 
 #cleaning up
 shutil.rmtree(brew_temp_dir)
